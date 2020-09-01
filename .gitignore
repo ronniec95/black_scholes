@@ -1,0 +1,17 @@
+*~
+.DS_Store
+**/bin/Debug
+**/bin/Release
+obj
+.vs
+.bin
+.gitignore
+/MeshClientLibrary
+/packages
+/Python/discoveryservice/__pycache__
+**/target
+**/*.rs.bk
+**/.history
+**/.vscode
+Cargo.lock
+!src/bin
