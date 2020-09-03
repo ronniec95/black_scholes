@@ -21,22 +21,6 @@ pub enum OptionDir {
     PUT = 1,
 }
 
-fn to_f32x8(src: &[f32]) -> f32x8 {
-    match src.len() {
-        8 => f32x8::from([
-            src[0], src[1], src[2], src[3], src[4], src[5], src[6], src[7],
-        ]),
-        7 => f32x8::from([src[0], src[1], src[2], src[3], src[4], src[5], src[6], 0.0]),
-        6 => f32x8::from([src[0], src[1], src[2], src[3], src[4], src[5], 0.0, 0.0]),
-        5 => f32x8::from([src[0], src[1], src[2], src[3], src[4], 0.0, 0.0, 0.0]),
-        4 => f32x8::from([src[0], src[1], src[2], src[3], 0.0, 0.0, 0.0, 0.0]),
-        3 => f32x8::from([src[0], src[1], src[2], 0.0, 0.0, 0.0, 0.0, 0.0]),
-        2 => f32x8::from([src[0], src[1], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-        1 => f32x8::from([src[0], 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]),
-        _ => f32x8::from(0.0),
-    }
-}
-
 /// Black Scholes call pricing. The results are at the same index as the inputs
 /// Years to expiry should be expressed as a f32 such as 20 days is 20/252 = 0.79
 /// Risk free rate, volatility and dividend yield expressed as f32 with 1.0 = 100%. 0.2 = 20% etc
@@ -51,12 +35,12 @@ pub fn bs_call(
     // Make everything f32x8
     let mut res = Vec::with_capacity(1);
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::call_f32x8(
             spot,
             strike,
@@ -83,12 +67,12 @@ pub fn bs_put(
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::put_f32x8(
             spot,
             strike,
@@ -115,12 +99,12 @@ pub fn put_delta(
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::delta(
             OptionDir::PUT,
             spot,
@@ -149,12 +133,12 @@ pub fn call_delta(
     let mut res = Vec::with_capacity(spot.len());
 
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::delta(
             OptionDir::CALL,
             spot,
@@ -183,12 +167,12 @@ pub fn vega(
     let mut res = Vec::with_capacity(spot.len());
 
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::vega_f32x8(
             spot,
             strike,
@@ -216,12 +200,12 @@ pub fn gamma(
     let mut res = Vec::with_capacity(spot.len());
 
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::gamma_f32x8(
             spot,
             strike,
@@ -249,12 +233,12 @@ pub fn call_theta(
     let mut res = Vec::with_capacity(spot.len());
 
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::theta(
             OptionDir::CALL,
             spot,
@@ -283,12 +267,12 @@ pub fn put_theta(
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::theta(
             OptionDir::PUT,
             spot,
@@ -317,12 +301,12 @@ pub fn call_rho(
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::call_rho_f32x8(
             spot,
             strike,
@@ -349,12 +333,12 @@ pub fn put_rho(
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let price: [f32; 8] = cast(bs_f32x8_::put_rho_f32x8(
             spot,
             strike,
@@ -388,12 +372,12 @@ pub fn call_greeks(
     let mut rho_res = Vec::with_capacity(spot.len());
     let mut pv_res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let greek = bs_f32x8_::call_greeks_f32x8(
             spot,
             strike,
@@ -446,12 +430,12 @@ pub fn put_greeks(
     let mut rho_res = Vec::with_capacity(spot.len());
     let mut pv_res = Vec::with_capacity(spot.len());
     for i in (0..spot.len()).step_by(8) {
-        let spot = to_f32x8(&spot[i..i + 8]);
-        let strike = to_f32x8(&strike[i..i + 8]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..i + 8]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..i + 8]);
-        let volatility = to_f32x8(&volatility[i..i + 8]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..i + 8]);
+        let spot = f32x8::from(&spot[i..i + 8]);
+        let strike = f32x8::from(&strike[i..i + 8]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..i + 8]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..i + 8]);
+        let volatility = f32x8::from(&volatility[i..i + 8]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..i + 8]);
         let greek = bs_f32x8_::put_greeks_f32x8(
             spot,
             strike,
@@ -499,12 +483,12 @@ pub fn call_implied_vol(
 ) -> Vec<f32> {
     let mut irvol = Vec::with_capacity(price.len());
     for i in (0..spot.len()).step_by(8) {
-        let price = to_f32x8(&price[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let strike = to_f32x8(&strike[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..]);
+        let price = f32x8::from(&price[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let strike = f32x8::from(&strike[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::implied_vol_f32x8(
             OptionDir::CALL,
             price,
@@ -534,12 +518,12 @@ pub fn put_implied_vol(
 ) -> Vec<f32> {
     let mut irvol = Vec::with_capacity(price.len());
     for i in (0..spot.len()).step_by(8) {
-        let price = to_f32x8(&price[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let strike = to_f32x8(&strike[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..]);
+        let price = f32x8::from(&price[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let strike = f32x8::from(&strike[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::implied_vol_f32x8(
             OptionDir::PUT,
             price,
@@ -569,12 +553,12 @@ pub fn call_implied_interest_rate(
 ) -> Vec<f32> {
     let mut irres = Vec::with_capacity(price.len());
     for i in (0..spot.len()).step_by(8) {
-        let price = to_f32x8(&price[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let strike = to_f32x8(&strike[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
-        let volatility = to_f32x8(&volatility[i..]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..]);
+        let price = f32x8::from(&price[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let strike = f32x8::from(&strike[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
+        let volatility = f32x8::from(&volatility[i..]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::implied_ir_f32x8(
             OptionDir::CALL,
             price,
@@ -604,12 +588,12 @@ pub fn put_implied_interest_rate(
 ) -> Vec<f32> {
     let mut irres = Vec::with_capacity(price.len());
     for i in (0..spot.len()).step_by(8) {
-        let price = to_f32x8(&price[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let strike = to_f32x8(&strike[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
-        let volatility = to_f32x8(&volatility[i..]);
-        let dividend_yield = to_f32x8(&dividend_yield[i..]);
+        let price = f32x8::from(&price[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let strike = f32x8::from(&strike[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
+        let volatility = f32x8::from(&volatility[i..]);
+        let dividend_yield = f32x8::from(&dividend_yield[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::implied_ir_f32x8(
             OptionDir::PUT,
             price,
@@ -685,11 +669,11 @@ pub fn call_strike_from_delta(
 ) -> Vec<f32> {
     let mut cs = Vec::with_capacity(delta.len());
     for i in (0..spot.len()).step_by(8) {
-        let delta = to_f32x8(&delta[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..]);
-        let volatility = to_f32x8(&volatility[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
+        let delta = f32x8::from(&delta[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..]);
+        let volatility = f32x8::from(&volatility[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::call_strike_from_delta_f32x8(
             delta,
             spot,
@@ -712,11 +696,11 @@ pub fn put_strike_from_delta(
 ) -> Vec<f32> {
     let mut ps = Vec::with_capacity(delta.len());
     for i in (0..spot.len()).step_by(8) {
-        let delta = to_f32x8(&delta[i..]);
-        let spot = to_f32x8(&spot[i..]);
-        let risk_free_rate = to_f32x8(&risk_free_rate[i..]);
-        let volatility = to_f32x8(&volatility[i..]);
-        let years_to_expiry = to_f32x8(&years_to_expiry[i..]);
+        let delta = f32x8::from(&delta[i..]);
+        let spot = f32x8::from(&spot[i..]);
+        let risk_free_rate = f32x8::from(&risk_free_rate[i..]);
+        let volatility = f32x8::from(&volatility[i..]);
+        let years_to_expiry = f32x8::from(&years_to_expiry[i..]);
         let res: [f32; 8] = cast(bs_f32x8_::put_strike_from_delta_f32x8(
             delta,
             spot,

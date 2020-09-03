@@ -12,13 +12,16 @@ fn erf_f32x8(x: f32x8) -> f32x8 {
     let l: f32x8 = f32x8::splat(-1.453152027);
     let d: f32x8 = f32x8::splat(1.061405429);
     let u = f32x8::ONE / e.mul_add(n, f32x8::ONE);
-    let m = f32x8::ONE
-        - (u.mul_add(u.mul_add(u.mul_add(d.mul_add(u, l), i), r), a)) * u * (-e * e).exp();
-    t.blend(-f32x8::ONE, f32x8::ONE) * m
+    let eu = u * (-e * e).exp();
+    let m = eu.mul_neg_add(
+        u.mul_add(u.mul_add(u.mul_add(d.mul_add(u, l), i), r), a),
+        f32x8::ONE,
+    );
+    t.blend(-m, m)
 }
 
 fn ncd_f32x8(e: f32x8) -> f32x8 {
-    let v = f32x8::HALF * (f32x8::ONE + erf_f32x8(e / (f32x8::splat(2.0) * f32x8::ONE).sqrt()));
+    let v = f32x8::HALF * (f32x8::ONE + erf_f32x8(e / f32x8::SQRT_2));
     let min: f32x8 = f32x8::splat(-1.0e5);
     let max: f32x8 = f32x8::splat(1.0e5);
     let zero_mask = e.cmp_lt(min);
@@ -682,6 +685,18 @@ mod tests {
     }
 
     #[test]
+    fn ncd_perf() {
+        let now = std::time::Instant::now();
+        let f = f32x8::splat(0.2f32);
+        let mut x = f32x8::ZERO;
+        for _ in 0..(10_000_000 / 8) {
+            ncd_f32x8(f);
+        }
+        let duration = now.elapsed().as_millis();
+        println!("Time take {}ms", duration);
+    }
+
+    #[test]
     fn call_check() {
         for i in (50..200).step_by(1) {
             let spot = 60.0;
@@ -1022,7 +1037,7 @@ mod tests {
     }
 
     #[test]
-    fn perf() {
+    fn put_perf() {
         let spot = f32x8::splat(150.0);
         let strike = f32x8::splat(156.0);
         let years_to_expiry = f32x8::splat(24.0 / 252.0);
@@ -1032,7 +1047,7 @@ mod tests {
 
         let now = std::time::Instant::now();
 
-        for _ in 0..1_000_000 / 8 {
+        for _ in 0..10_000_000 / 8 {
             // Basic call/put test
             let _ = put_f32x8(
                 spot,
@@ -1042,6 +1057,17 @@ mod tests {
                 volatility,
                 dividend_yield,
             );
+        }
+        let duration = now.elapsed().as_millis();
+        println!("Time take {}ms", duration);
+    }
+
+    #[test]
+    fn cdf_perf() {
+        let now = std::time::Instant::now();
+        let f = f32x8::splat(0.2);
+        for _ in 0..10_000_000 / 8 {
+            ncd_f32x8(f);
         }
         let duration = now.elapsed().as_millis();
         println!("Time take {}ms", duration);

@@ -44,21 +44,21 @@ pub fn call(
     volatility: f32,
     dividend_yield: f32,
 ) -> f32 {
-    let d = years_to_expiry.sqrt();
-    let rd = volatility * d;
+    let years_sqrt = years_to_expiry.sqrt();
+    let rd = volatility * years_sqrt;
     let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = 1.0 / rd * (ssln + (il + vs2) * years_to_expiry);
     let d2 = d1 - rd;
     //let v = npd(d1);
-    let la = (-dividend_yield * years_to_expiry).exp();
-    let ia = (-risk_free_rate * years_to_expiry).exp();
-    let g = strike * ia;
+    let dividend_years_exp = (-dividend_yield * years_to_expiry).exp();
+    let risk_free_years_exp = (-risk_free_rate * years_to_expiry).exp();
+    let strike_x_risk_free_years_exp = strike * risk_free_years_exp;
     // Call specific
-    let o = ncd(d1);
-    let c = ncd(d2);
-    o * spot * la - c * g
+    let ncd_d1 = ncd(d1);
+    let ncd_d2 = ncd(d2);
+    ncd_d1 * spot * dividend_years_exp - ncd_d2 * strike_x_risk_free_years_exp
 }
 
 pub fn call_delta(
@@ -691,11 +691,11 @@ mod tests {
         let now = std::time::Instant::now();
         let f = 0.2f32;
         let mut x = 0.0;
-        for _ in 0..16000000 {
+        for _ in 0..12_000_000 {
             x += ncd(f);
         }
         let duration = now.elapsed().as_millis();
-        println!("Time take {}ms", duration);
+        println!("Time take {}ms {}", duration, x);
         assert!(x > 1.0);
     }
 
@@ -757,5 +757,45 @@ mod tests {
             dividend_yield,
         );
         assert!((v - risk_free_rate).abs() < 0.001);
+    }
+
+    #[test]
+    fn perf_single() {
+        let spot = 150.0;
+        let strike = 156.0;
+        let years_to_expiry = 24.0 / 252.0;
+        let risk_free_rate = 0.02;
+        let volatility = 0.2;
+        let dividend_yield = 0.01;
+
+        let now = std::time::Instant::now();
+
+        for _ in 0..10_000_000 {
+            // Basic call/put test
+            let _ = put(
+                spot,
+                strike,
+                years_to_expiry,
+                risk_free_rate,
+                volatility,
+                dividend_yield,
+            );
+        }
+        let duration = now.elapsed().as_millis();
+        println!(
+            "Time take to run 10,000,000 bs calculations was {}ms",
+            duration
+        );
+    }
+
+    #[test]
+    fn simple_demo() {
+        let a = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+        let b = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+        let mut c = Vec::with_capacity(a.len());
+        for i in 0..a.len() {
+            c.push(a[i] + b[i]);
+        }
+        println!("Sum is {:?}", c);
     }
 }

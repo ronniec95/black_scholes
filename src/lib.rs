@@ -20,3 +20,5 @@
 pub mod bs;
 mod bs_f32x8_;
 pub mod bs_single;
+pub use bs::*;
+pub use bs_single::*;
