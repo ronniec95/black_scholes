@@ -1,6 +1,6 @@
 [package]
 name = "black_scholes_pricer"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["ronnie chowdhury <ronnie.c995@gmail.com>"]
 edition = "2018"
 description = "Scalar and SIMD vectorised versions of black scholes and binomial option pricing"
