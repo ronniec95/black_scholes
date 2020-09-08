@@ -7,7 +7,7 @@ description = "Scalar and SIMD vectorised versions of black scholes and binomial
 license = "MIT"
 repository = "https://github.com/ronniec95/black_scholes"
 readme = "README.md"
-keywords = ["option","pricing","simd","black","scholes","dividend","quant"]
+keywords = ["option","pricing","simd","black","scholes"]
 
 [lib]
 name = "black_scholes_pricer"
