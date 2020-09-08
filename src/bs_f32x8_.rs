@@ -24,6 +24,7 @@ fn ncd_f32x8(e: f32x8) -> f32x8 {
     let v = f32x8::HALF * (f32x8::ONE + erf_f32x8(e / f32x8::SQRT_2));
     let min: f32x8 = f32x8::splat(-1.0e5);
     let max: f32x8 = f32x8::splat(1.0e5);
+
     let zero_mask = e.cmp_lt(min);
     let one_mask = e.cmp_gt(max);
     let v = zero_mask.blend(f32x8::ZERO, v);
@@ -32,9 +33,8 @@ fn ncd_f32x8(e: f32x8) -> f32x8 {
 }
 
 fn npd_f32x8(e: f32x8) -> f32x8 {
-    let c: f32x8 = f32x8::splat(0.3989422804014330);
-
-    c * (f32x8::HALF * e * e).exp()
+    const C: f32 = 0.3989422804014330;
+    (0.5 * e * e).exp() * C
 }
 
 // t - spot
@@ -53,10 +53,10 @@ pub(crate) fn call_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
-    let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
+    let d1 = 1.0 / rd * (ssln + (il + vs2) * years_to_expiry);
     let d2 = d1 - rd;
     let la = (-dividend_yield * years_to_expiry).exp();
     let ia = (-risk_free_rate * years_to_expiry).exp();
@@ -77,7 +77,7 @@ pub(crate) fn call_delta_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -97,7 +97,7 @@ pub(crate) fn put_delta_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -118,7 +118,7 @@ pub(crate) fn gamma_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -137,7 +137,7 @@ pub(crate) fn vega_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -155,7 +155,7 @@ pub(crate) fn call_theta_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -167,7 +167,7 @@ pub(crate) fn call_theta_f32x8(
     // Call specific
     let o = ncd_f32x8(d1);
     let c = ncd_f32x8(d2);
-    -la * spot * v * volatility / (f32x8::splat(2.0) * d) - risk_free_rate * g * c
+    -la * spot * v * volatility / (2.0 * d) - risk_free_rate * g * c
         + dividend_yield * spot * la * o
 }
 
@@ -181,7 +181,7 @@ pub(crate) fn put_theta_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -192,7 +192,7 @@ pub(crate) fn put_theta_f32x8(
     let g = strike * ia;
     let o = ncd_f32x8(-d1);
     let c = ncd_f32x8(-d2);
-    -la * spot * v * volatility / (f32x8::splat(2.0) * d) + risk_free_rate * g * c
+    -la * spot * v * volatility / (2.0 * d) + risk_free_rate * g * c
         - dividend_yield * spot * la * o
 }
 pub(crate) fn call_rho_f32x8(
@@ -205,7 +205,7 @@ pub(crate) fn call_rho_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -228,7 +228,7 @@ pub(crate) fn put_rho_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -249,7 +249,7 @@ pub(crate) fn put_f32x8(
 ) -> f32x8 {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -431,7 +431,7 @@ pub(crate) fn implied_ir_f32x8(
     volatility: f32x8,
     dividend_yield: f32x8,
 ) -> f32x8 {
-    let mut risk_free_rate = f32x8::splat(0.05);
+    let mut risk_free_rate: f32x8 = 0.05.into();
     loop {
         let option_value = price_f32x8(
             option_dir,
@@ -453,7 +453,7 @@ pub(crate) fn implied_ir_f32x8(
         );
 
         let diff = option_value - price;
-        let mask = diff.abs().cmp_lt(f32x8::splat(0.0001));
+        let mask = diff.abs().cmp_lt(0.0001.into());
         if mask.all() {
             break;
         }
@@ -465,8 +465,8 @@ pub(crate) fn implied_ir_f32x8(
             .cmp_lt(f32x8::ZERO)
             .blend(f32x8::ZERO, risk_free_rate);
         risk_free_rate = risk_free_rate
-            .cmp_gt(f32x8::splat(2.0))
-            .blend(f32x8::splat(2.0), risk_free_rate);
+            .cmp_gt(2.0.into())
+            .blend(2.0.into(), risk_free_rate);
     }
     risk_free_rate
 }
@@ -480,8 +480,7 @@ pub(crate) fn call_strike_from_delta_f32x8(
 ) -> f32x8 {
     let tsq = years_to_expiry.sqrt();
     let d1 = delta * (risk_free_rate * years_to_expiry).exp();
-    let t_0 = -ncd_f32x8(d1) * volatility * tsq
-        + (volatility * volatility) / f32x8::splat(2.0) * years_to_expiry;
+    let t_0 = -ncd_f32x8(d1) * volatility * tsq + (volatility * volatility) / 2.0 * years_to_expiry;
     spot * t_0.abs()
 }
 
@@ -494,8 +493,7 @@ pub(crate) fn put_strike_from_delta_f32x8(
 ) -> f32x8 {
     let tsq = years_to_expiry.sqrt();
     let d1 = delta * (risk_free_rate * years_to_expiry).exp();
-    let t_0 = ncd_f32x8(d1) * volatility * tsq
-        + (volatility * volatility) / f32x8::splat(2.0) * years_to_expiry;
+    let t_0 = ncd_f32x8(d1) * volatility * tsq + (volatility * volatility) / 2.0 * years_to_expiry;
     spot * t_0.abs()
 }
 
@@ -518,7 +516,7 @@ pub(crate) fn call_greeks_f32x8(
 ) -> Greek {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -534,7 +532,7 @@ pub(crate) fn call_greeks_f32x8(
     let delta = la * o;
     let gamma = -la * v / (spot * volatility * d);
     let vega = spot * la * v * d;
-    let theta = -la * spot * v * volatility / (f32x8::splat(2.0) * d) - risk_free_rate * g * c
+    let theta = -la * spot * v * volatility / (2.0 * d) - risk_free_rate * g * c
         + dividend_yield * spot * la * o;
     let rho = g * years_to_expiry * c;
     Greek {
@@ -557,7 +555,7 @@ pub(crate) fn put_greeks_f32x8(
 ) -> Greek {
     let d = years_to_expiry.sqrt();
     let rd = volatility * d;
-    let vs2 = (volatility * volatility) / f32x8::splat(2.0);
+    let vs2 = (volatility * volatility) / 2.0;
     let ssln = (spot / strike).ln();
     let il = risk_free_rate - dividend_yield;
     let d1 = f32x8::ONE / rd * (ssln + (il + vs2) * years_to_expiry);
@@ -575,7 +573,7 @@ pub(crate) fn put_greeks_f32x8(
     let delta = -la * o;
     let gamma = -la * v / (spot * volatility * d);
     let vega = spot * la * v * d;
-    let theta = -la * spot * v * volatility / (f32x8::splat(2.0) * d) + risk_free_rate * g * c
+    let theta = -la * spot * v * volatility / (2.0 * d) + risk_free_rate * g * c
         - dividend_yield * spot * la * o;
     let rho = -g * years_to_expiry * c;
     Greek {
@@ -661,7 +659,7 @@ mod tests {
     fn erf_check() {
         for i in (-100..100).step_by(1) {
             let expected = erf(i as f32 / 100.0);
-            let actual: [f32; 8] = cast(erf_f32x8(f32x8::splat(i as f32 / 100.0)));
+            let actual: [f32; 8] = cast(erf_f32x8((i as f32 / 100.0).into()));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
     }
@@ -670,7 +668,7 @@ mod tests {
     fn npd_check() {
         for i in (-100..100).step_by(1) {
             let expected = npd(i as f32 / 100.0);
-            let actual: [f32; 8] = cast(npd_f32x8(f32x8::splat(i as f32 / 100.0)));
+            let actual: [f32; 8] = cast(npd_f32x8((i as f32 / 100.0).into()));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
     }
@@ -679,7 +677,7 @@ mod tests {
     fn ncd_check() {
         for i in (-100..100).step_by(1) {
             let expected = ncd(i as f32 / 100.0);
-            let actual: [f32; 8] = cast(ncd_f32x8(f32x8::splat(i as f32 / 100.0)));
+            let actual: [f32; 8] = cast(ncd_f32x8((i as f32 / 100.0).into()));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
     }
@@ -687,10 +685,9 @@ mod tests {
     #[test]
     fn ncd_perf() {
         let now = std::time::Instant::now();
-        let f = f32x8::splat(0.2f32);
-        let mut x = f32x8::ZERO;
+        const F: f32 = 0.2;
         for _ in 0..(10_000_000 / 8) {
-            ncd_f32x8(f);
+            ncd_f32x8(F.into());
         }
         let duration = now.elapsed().as_millis();
         println!("Time take {}ms", duration);
@@ -781,12 +778,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(vega_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 100.0);
         }
@@ -813,12 +810,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(gamma_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
@@ -844,12 +841,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(put_rho_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
 
@@ -863,12 +860,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(call_rho_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
@@ -895,12 +892,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(put_delta_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
 
@@ -914,12 +911,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(call_delta_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
@@ -946,12 +943,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(put_theta_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
 
@@ -965,12 +962,12 @@ mod tests {
             );
 
             let actual: [f32; 8] = cast(call_theta_f32x8(
-                f32x8::splat(spot),
-                f32x8::splat(strike),
-                f32x8::splat(years_to_expiry),
-                f32x8::splat(risk_free_rate),
-                f32x8::splat(volatility),
-                f32x8::splat(dividend_yield),
+                spot.into(),
+                strike.into(),
+                years_to_expiry.into(),
+                risk_free_rate.into(),
+                volatility.into(),
+                dividend_yield.into(),
             ));
             assert!((actual[0] - expected).abs() < 0.00001);
         }
@@ -996,12 +993,12 @@ mod tests {
         );
         let v: [f32; 8] = cast(implied_vol_f32x8(
             OptionDir::CALL,
-            f32x8::splat(call_s),
-            f32x8::splat(spot),
-            f32x8::splat(strike),
-            f32x8::splat(years_to_expiry),
-            f32x8::splat(risk_free_rate),
-            f32x8::splat(dividend_yield),
+            call_s.into(),
+            spot.into(),
+            strike.into(),
+            years_to_expiry.into(),
+            risk_free_rate.into(),
+            dividend_yield.into(),
         ));
         assert!((v[0] - volatility).abs() < 0.001);
     }
@@ -1026,24 +1023,24 @@ mod tests {
         );
         let v: [f32; 8] = cast(implied_ir_f32x8(
             OptionDir::CALL,
-            f32x8::splat(call_s),
-            f32x8::splat(spot),
-            f32x8::splat(strike),
-            f32x8::splat(years_to_expiry),
-            f32x8::splat(volatility),
-            f32x8::splat(dividend_yield),
+            call_s.into(),
+            spot.into(),
+            strike.into(),
+            years_to_expiry.into(),
+            volatility.into(),
+            dividend_yield.into(),
         ));
         assert!((v[0] - risk_free_rate).abs() < 0.001);
     }
 
     #[test]
     fn put_perf() {
-        let spot = f32x8::splat(150.0);
-        let strike = f32x8::splat(156.0);
-        let years_to_expiry = f32x8::splat(24.0 / 252.0);
-        let risk_free_rate = f32x8::splat(0.02);
-        let volatility = f32x8::splat(0.2);
-        let dividend_yield = f32x8::splat(0.01);
+        let spot = 150.0.into();
+        let strike = 156.0.into();
+        let years_to_expiry = (24.0 / 252.0).into();
+        let risk_free_rate = 0.02.into();
+        let volatility = 0.2.into();
+        let dividend_yield = 0.01.into();
 
         let now = std::time::Instant::now();
 
@@ -1065,9 +1062,9 @@ mod tests {
     #[test]
     fn cdf_perf() {
         let now = std::time::Instant::now();
-        let f = f32x8::splat(0.2);
+        const F: f32 = 0.2;
         for _ in 0..10_000_000 / 8 {
-            ncd_f32x8(f);
+            ncd_f32x8(F.into());
         }
         let duration = now.elapsed().as_millis();
         println!("Time take {}ms", duration);

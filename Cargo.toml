@@ -1,13 +1,19 @@
 [package]
 name = "black_scholes_pricer"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["ronnie chowdhury <ronnie.c995@gmail.com>"]
 edition = "2018"
+description = "Scalar and SIMD vectorised versions of black scholes and binomial option pricing"
+license = "MIT"
+repository = "https://github.com/ronniec95/black_scholes"
+readme = "README.md"
+keywords = ["option","pricing","simd","black","scholes","dividend","quant"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "black_scholes_pricer"
 
 [dependencies]
-wide= "^0.5"
+wide= "0.5"
 bytemuck = "^1"
 
 [profile.dev]

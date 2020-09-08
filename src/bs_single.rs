@@ -30,13 +30,8 @@ pub(crate) fn npd(e: f32) -> f32 {
     C * (0.5 * e * e).exp()
 }
 
-// t - spot
-// n - strike
-// r - volatility
-// a - years_to_expiry
-// i - interest
-// l - dividend
-pub fn call(
+/// Calculate call price of an option with dividends
+pub(crate) fn call(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -61,7 +56,8 @@ pub fn call(
     ncd_d1 * spot * dividend_years_exp - ncd_d2 * strike_x_risk_free_years_exp
 }
 
-pub fn call_delta(
+/// Calculate call delta of an option with dividends
+pub(crate) fn call_delta(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -86,7 +82,8 @@ pub fn call_delta(
     la * o
 }
 
-pub fn put_delta(
+/// Calculate put delta of an option with dividends
+pub(crate) fn put_delta(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -111,6 +108,7 @@ pub fn put_delta(
     -la * o
 }
 
+/// Calculate gamma of an option with dividends
 pub fn gamma(
     spot: f32,
     strike: f32,
@@ -130,6 +128,7 @@ pub fn gamma(
     -la * v / (spot * volatility * d)
 }
 
+/// Calculate vega of an option with dividends
 pub fn vega(
     spot: f32,
     strike: f32,
@@ -149,7 +148,8 @@ pub fn vega(
     spot * la * v * d
 }
 
-pub fn call_theta(
+/// Calculate call theta of an option with dividends
+pub(crate) fn call_theta(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -175,7 +175,8 @@ pub fn call_theta(
         + dividend_yield * spot * la * o
 }
 
-pub fn put_theta(
+/// Calculate put theta of an option with dividends
+pub(crate) fn put_theta(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -200,7 +201,8 @@ pub fn put_theta(
         - dividend_yield * spot * la * o
 }
 
-pub fn call_rho(
+/// Calculate call rho of an option with dividends
+pub(crate) fn call_rho(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -222,7 +224,8 @@ pub fn call_rho(
     g * years_to_expiry * c
 }
 
-pub fn put_rho(
+/// Calculate put rho of an option with dividends
+pub(crate) fn put_rho(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -244,7 +247,8 @@ pub fn put_rho(
     -g * years_to_expiry * c
 }
 
-pub fn put(
+/// Calculate put price an option with dividends
+pub(crate) fn put(
     spot: f32,
     strike: f32,
     years_to_expiry: f32,
@@ -497,6 +501,7 @@ pub fn implied_interest_rate(
     risk_free_rate
 }
 
+/// Binomial put pricing
 pub fn american_put(
     spot: f32,
     strike: f32,
@@ -527,6 +532,7 @@ pub fn american_put(
     v[0]
 }
 
+/// Calculate the call strike from a delta value
 pub fn call_strike_from_delta(
     delta: f32,
     spot: f32,
@@ -540,6 +546,7 @@ pub fn call_strike_from_delta(
     spot * t_0.abs()
 }
 
+/// Calculate the put strike from a delta value
 pub fn put_strike_from_delta(
     delta: f32,
     spot: f32,
