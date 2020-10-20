@@ -27,10 +27,10 @@ pub enum OptionDir {
 pub fn bs_call(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     // Make everything f32x8
     let max_idx = spot.len();
@@ -45,10 +45,10 @@ pub fn bs_call(
         let price: [f32; 8] = cast(bs_f32x8_::call_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -61,10 +61,10 @@ pub fn bs_call(
 pub fn bs_put(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     let max_idx = spot.len();
@@ -78,10 +78,10 @@ pub fn bs_put(
         let price: [f32; 8] = cast(bs_f32x8_::put_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -94,10 +94,10 @@ pub fn bs_put(
 pub fn put_delta(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let mut res = Vec::with_capacity(spot.len());
     let max_idx = spot.len();
@@ -112,10 +112,10 @@ pub fn put_delta(
             OptionDir::PUT,
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -128,10 +128,10 @@ pub fn put_delta(
 pub fn call_delta(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -146,10 +146,10 @@ pub fn call_delta(
             OptionDir::CALL,
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -162,10 +162,10 @@ pub fn call_delta(
 pub fn vega(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -179,10 +179,10 @@ pub fn vega(
         let price: [f32; 8] = cast(bs_f32x8_::vega_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -195,10 +195,10 @@ pub fn vega(
 pub fn gamma(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -212,10 +212,10 @@ pub fn gamma(
         let price: [f32; 8] = cast(bs_f32x8_::gamma_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -228,10 +228,10 @@ pub fn gamma(
 pub fn call_theta(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -246,10 +246,10 @@ pub fn call_theta(
             OptionDir::CALL,
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -263,10 +263,10 @@ pub fn call_theta(
 pub fn put_theta(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -281,10 +281,10 @@ pub fn put_theta(
             OptionDir::PUT,
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -298,10 +298,10 @@ pub fn put_theta(
 pub fn call_rho(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -315,10 +315,10 @@ pub fn call_rho(
         let price: [f32; 8] = cast(bs_f32x8_::call_rho_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -331,10 +331,10 @@ pub fn call_rho(
 pub fn put_rho(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut res = Vec::with_capacity(spot.len());
@@ -348,10 +348,10 @@ pub fn put_rho(
         let price: [f32; 8] = cast(bs_f32x8_::put_rho_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         res.extend(&price);
     }
@@ -366,10 +366,10 @@ pub fn put_rho(
 pub fn call_greeks(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Greeks {
     let max_idx = spot.len();
     let mut delta_res = Vec::with_capacity(spot.len());
@@ -388,10 +388,10 @@ pub fn call_greeks(
         let greek = bs_f32x8_::call_greeks_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         );
 
         let pv: [f32; 8] = cast(greek.pv);
@@ -425,10 +425,10 @@ pub fn call_greeks(
 pub fn put_greeks(
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
-    risk_free_rate: &[f32],
     volatility: &[f32],
+    risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Greeks {
     let max_idx = spot.len();
     let mut delta_res = Vec::with_capacity(spot.len());
@@ -447,10 +447,10 @@ pub fn put_greeks(
         let greek = bs_f32x8_::put_greeks_f32x8(
             spot,
             strike,
-            years_to_expiry,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         );
 
         let pv: [f32; 8] = cast(greek.pv);
@@ -485,9 +485,9 @@ pub fn call_implied_vol(
     price: &[f32],
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
     risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut irvol = Vec::with_capacity(price.len());
@@ -503,9 +503,9 @@ pub fn call_implied_vol(
             price,
             spot,
             strike,
-            years_to_expiry,
             risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         irvol.extend(&res);
     }
@@ -521,9 +521,9 @@ pub fn put_implied_vol(
     price: &[f32],
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
     risk_free_rate: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut irvol = Vec::with_capacity(price.len());
@@ -539,9 +539,9 @@ pub fn put_implied_vol(
             price,
             spot,
             strike,
-            years_to_expiry,
             risk_free_rate,
             dividend_yield,
+            years_to_expiry,
         ));
         irvol.extend(&res);
     }
@@ -557,9 +557,9 @@ pub fn call_implied_interest_rate(
     price: &[f32],
     spot: &[f32],
     strike: &[f32],
-    years_to_expiry: &[f32],
     volatility: &[f32],
     dividend_yield: &[f32],
+    years_to_expiry: &[f32],
 ) -> Vec<f32> {
     let max_idx = spot.len();
     let mut irres = Vec::with_capacity(price.len());
@@ -575,9 +575,9 @@ pub fn call_implied_interest_rate(
             price,
             spot,
             strike,
-            years_to_expiry,
             volatility,
             dividend_yield,
+            years_to_expiry,
         ));
         irres.extend(&res);
     }
@@ -611,9 +611,9 @@ pub fn put_implied_interest_rate(
             price,
             spot,
             strike,
-            years_to_expiry,
             volatility,
             dividend_yield,
+            years_to_expiry,
         ));
         irres.extend(&res);
     }
@@ -690,8 +690,8 @@ pub fn call_strike_from_delta(
         let res: [f32; 8] = cast(bs_f32x8_::call_strike_from_delta_f32x8(
             delta,
             spot,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             years_to_expiry,
         ));
         cs.extend(&res);
@@ -718,11 +718,37 @@ pub fn put_strike_from_delta(
         let res: [f32; 8] = cast(bs_f32x8_::put_strike_from_delta_f32x8(
             delta,
             spot,
-            risk_free_rate,
             volatility,
+            risk_free_rate,
             years_to_expiry,
         ));
         ps.extend(&res);
     }
     ps
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn call_small_check() {
+        let spot = [110.0, 110.0, 110.0, 110.0, 110.0];
+        let strike = [120.0, 120.0, 120.0, 120.0, 120.0];
+        let y2e = 25.0 / 252.0;
+        let years_to_expiry = [y2e, y2e, y2e, y2e, y2e];
+        let risk_free_rate = [0.02, 0.02, 0.02, 0.02, 0.02];
+        let volatility = [0.15, 0.16, 0.17, 0.18, 0.19];
+        let dividend_yield = [0.05, 0.05, 0.05, 0.05, 0.05];
+
+        // Basic call/put test
+        let expected = bs_call(
+            &spot,
+            &strike,
+            &volatility,
+            &risk_free_rate,
+            &dividend_yield,
+            &years_to_expiry,
+        );
+        dbg!(expected);
+    }
 }
