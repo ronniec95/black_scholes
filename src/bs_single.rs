@@ -543,10 +543,10 @@ pub fn implied_interest_rate(
 pub fn american_put(
     spot: f32,
     strike: f32,
-    years_to_expiry: f32,
-    risk_free_rate: f32,
     volatility: f32,
+    risk_free_rate: f32,
     dividend_yield: f32,
+    years_to_expiry: f32,
 ) -> f32 {
     const BINOMIAL_ITER: f32 = 16f32;
 
