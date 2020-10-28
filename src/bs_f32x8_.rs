@@ -397,6 +397,7 @@ pub(crate) fn implied_vol_f32x8(
     years_to_expiry: f32x8,
 ) -> f32x8 {
     let mut volatility = f32x8::splat(0.2);
+    let mut count = 0;
     loop {
         let option_value = price_f32x8(
             option_dir,
@@ -421,8 +422,13 @@ pub(crate) fn implied_vol_f32x8(
             years_to_expiry,
         );
         let bump_mask = diff.cmp_gt(f32x8::ZERO);
-        let bump_value = diff / derivative;
+        let bump_value = (diff / derivative).abs();
         volatility = bump_mask.blend(volatility - bump_value, volatility + bump_value);
+        if count > 50 {
+            break;
+        } else {
+            count = count + 1
+        }
     }
     volatility
 }
@@ -437,6 +443,7 @@ pub(crate) fn implied_ir_f32x8(
     years_to_expiry: f32x8,
 ) -> f32x8 {
     let mut risk_free_rate: f32x8 = 0.05.into();
+    let mut count = 0;
     loop {
         let option_value = price_f32x8(
             option_dir,
@@ -463,7 +470,7 @@ pub(crate) fn implied_ir_f32x8(
             break;
         }
         let bump_mask = diff.cmp_gt(f32x8::ZERO);
-        let bump_value = diff / derivative;
+        let bump_value = (diff / derivative).abs();
         risk_free_rate = bump_mask.blend(risk_free_rate - bump_value, risk_free_rate + bump_value);
         // Extremes
         risk_free_rate = risk_free_rate
@@ -472,6 +479,12 @@ pub(crate) fn implied_ir_f32x8(
         risk_free_rate = risk_free_rate
             .cmp_gt(2.0.into())
             .blend(2.0.into(), risk_free_rate);
+
+        if count > 50 {
+            break;
+        } else {
+            count = count + 1
+        }
     }
     risk_free_rate
 }

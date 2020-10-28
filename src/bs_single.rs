@@ -455,6 +455,7 @@ pub fn implied_vol(
     dividend_yield: f32,
 ) -> f32 {
     let mut volatility = 0.2f32;
+    let mut count = 0;
     loop {
         let option_value = bs_price(
             option_dir,
@@ -465,6 +466,7 @@ pub fn implied_vol(
             dividend_yield,
             years_to_expiry,
         );
+        dbg!(&option_value);
         let derivative = vega(
             spot,
             strike,
@@ -473,14 +475,24 @@ pub fn implied_vol(
             dividend_yield,
             years_to_expiry,
         );
-        let diff = option_value - price;
+        dbg!(&derivative);
+
+        let diff = (option_value - price);
         if diff.abs() < 0.0001 {
             break;
         }
+        dbg!(&diff);
+
         if diff > 0.0 {
-            volatility = volatility - diff / derivative
+            volatility = volatility - (diff / derivative).abs()
         } else {
-            volatility = volatility + diff / derivative
+            volatility = volatility + (diff / derivative).abs()
+        }
+        dbg!(volatility);
+        if count > 50 {
+            break;
+        } else {
+            count = count + 1;
         }
     }
     volatility
@@ -497,6 +509,7 @@ pub fn implied_interest_rate(
     dividend_yield: f32,
 ) -> f32 {
     let mut risk_free_rate = 0.05f32;
+    let mut count = 0;
     loop {
         let option_value = bs_price(
             option_dir,
@@ -522,9 +535,9 @@ pub fn implied_interest_rate(
             break;
         }
         if diff > 0.0 {
-            risk_free_rate = risk_free_rate - diff / derivative
+            risk_free_rate = risk_free_rate - (diff / derivative).abs()
         } else {
-            risk_free_rate = risk_free_rate + diff / derivative
+            risk_free_rate = risk_free_rate + (diff / derivative).abs()
         }
         // Extremes
         if risk_free_rate < 0.0 {
@@ -534,6 +547,11 @@ pub fn implied_interest_rate(
         if risk_free_rate > 2.0 {
             risk_free_rate = 2.0;
             break;
+        }
+        if count > 50 {
+            break;
+        } else {
+            count = count + 1;
         }
     }
     risk_free_rate
@@ -891,5 +909,25 @@ mod tests {
             c.push(a[i] + b[i]);
         }
         println!("Sum is {:?}", c);
+    }
+
+    #[test]
+    fn iv_test2() {
+        let spot = 180.7;
+        let strike = 180.7;
+        let years_to_expiry = 9.0 / 252.0;
+        let risk_free_rate = 0.001;
+        let dividend_yield = 0.00;
+
+        let v = implied_vol(
+            OptionDir::PUT,
+            5.15,
+            spot,
+            strike,
+            years_to_expiry,
+            risk_free_rate,
+            dividend_yield,
+        );
+        dbg!(&v);
     }
 }
