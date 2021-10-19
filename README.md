@@ -25,7 +25,7 @@ As a thought experiment I used this to see what performance I could eeek out of 
 For 10,000,000 calls to `bs_single::call()`
 
 * Dev: ~7500ms
-* Release: ~1900,s
+* Release: ~1900ms
 
 with `RUST_FLAGS=-C -target_feature=+avx,+fma`
 * Release: ~750ms
@@ -38,3 +38,6 @@ with `RUST_FLAGS=-C -target_feature=+avx,+fma`, with Wide math functions
 * Release: ~100ms
 
 So around 18x speed up when written with careful CPU consideration
+
+# License
+GNU AGPL-3.0-or-later; see [AGPL-v3](LICENSE).

@@ -6,8 +6,9 @@ edition = "2018"
 keywords = ["option", "pricing", "simd", "black", "scholes"]
 license = "MIT"
 name = "black_scholes_pricer"
-readme = "README.md"
 repository = "https://github.com/ronniec95/black_scholes"
+readme = "README.md"
+keywords = ["option","pricing","simd","black","scholes"]
 version = "0.2.2"
 
 [lib]
@@ -18,9 +19,7 @@ bytemuck = "^1"
 wide = "0.7"
 
 [profile.dev]
-debug = 2
 opt-level = 0
 
 [profile.release]
-debug = 0
 opt-level = 3
