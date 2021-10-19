@@ -454,8 +454,12 @@ pub fn implied_vol(
     risk_free_rate: f32,
     dividend_yield: f32,
 ) -> f32 {
+    if price == 0.0 {
+        return 0.0;
+    }
     let mut volatility = 0.2f32;
     let mut count = 0;
+    dbg!(&price);
     loop {
         let option_value = bs_price(
             option_dir,
@@ -477,20 +481,16 @@ pub fn implied_vol(
         );
         dbg!(&derivative);
 
-        let diff = (option_value - price);
-        if diff.abs() < 0.0001 {
-            break;
-        }
+        let diff = option_value - price;
         dbg!(&diff);
-
-        if diff > 0.0 {
-            volatility = volatility - (diff / derivative).abs()
-        } else {
-            volatility = volatility + (diff / derivative).abs()
-        }
-        dbg!(volatility);
-        if count > 50 {
+        if diff.abs() < 0.001 {
             break;
+        }
+        let derivative = f32::max(derivative, 1.0);
+        volatility = volatility - diff / derivative;
+        dbg!(volatility);
+        if count > 100 {
+            return 0.0; // Did not converge
         } else {
             count = count + 1;
         }
@@ -929,5 +929,85 @@ mod tests {
             dividend_yield,
         );
         dbg!(&v);
+    }
+
+    #[test]
+    fn check_iv_from_price_1() {
+        let spot = 130.40;
+        let strike = 140.0;
+        let years_to_expiry = 10.0 / 365.0;
+        let risk_free_rate = 0.001;
+        let volatility = 0.2329;
+        let dividend_yield = 0.00625 * 4.0;
+
+        // Basic call/put test
+        let call_s = put(
+            spot,
+            strike,
+            volatility,
+            risk_free_rate,
+            dividend_yield,
+            years_to_expiry,
+        );
+        let v = implied_vol(
+            OptionDir::PUT,
+            8.15,
+            spot,
+            strike,
+            years_to_expiry,
+            risk_free_rate,
+            dividend_yield,
+        );
+        println!("Call {} IV {:?}", call_s, v);
+    }
+
+    #[test]
+    fn check_iv_from_price_2() {
+        let spot = 130.40;
+        let strike = 140.0;
+        let years_to_expiry = 10.0 / 365.0;
+        let risk_free_rate = 0.001;
+        let volatility = 0.2329;
+        let dividend_yield = 0.00625 * 4.0;
+
+        // Basic call/put test
+        let call_s = put(
+            spot,
+            strike,
+            volatility,
+            risk_free_rate,
+            dividend_yield,
+            years_to_expiry,
+        );
+        let v = implied_vol(
+            OptionDir::PUT,
+            9.74,
+            spot,
+            strike,
+            years_to_expiry,
+            risk_free_rate,
+            dividend_yield,
+        );
+        println!("Call {} IV {:?}", call_s, v);
+    }
+
+    #[test]
+    fn check_theta() {
+        let spot = 100.0;
+        let strike = 100.0;
+        let years_to_expiry = 20.0 / 365.0;
+        let risk_free_rate = 0.02;
+        let volatility = 0.2;
+        let dividend_yield = 0.0; //0.00625 * 4.0;
+
+        let v = call_theta(
+            spot,
+            strike,
+            volatility,
+            risk_free_rate,
+            dividend_yield,
+            years_to_expiry,
+        );
+        println!("Theta {:?}", v);
     }
 }

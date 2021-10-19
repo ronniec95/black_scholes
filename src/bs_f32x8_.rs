@@ -421,15 +421,19 @@ pub(crate) fn implied_vol_f32x8(
             dividend_yield,
             years_to_expiry,
         );
-        let bump_mask = diff.cmp_gt(f32x8::ZERO);
-        let bump_value = (diff / derivative).abs();
-        volatility = bump_mask.blend(volatility - bump_value, volatility + bump_value);
-        if count > 50 {
+        let derivative = derivative.max(f32x8::ONE);
+        let bump_value = diff / derivative;
+        volatility = volatility - bump_value;
+        if count > 100 {
             break;
         } else {
             count = count + 1
         }
     }
+    let vol_mask = volatility.cmp_gt(f32x8::ZERO);
+    volatility = vol_mask.blend(volatility, f32x8::ZERO);
+    let price_mask = price.cmp_eq(f32x8::ZERO);
+    volatility = price_mask.blend(f32x8::ZERO, volatility);
     volatility
 }
 
@@ -454,6 +458,13 @@ pub(crate) fn implied_ir_f32x8(
             dividend_yield,
             years_to_expiry,
         );
+
+        let diff = option_value - price;
+        let mask: f32x8 = diff.abs();
+        let mask: f32x8 = mask.cmp_lt(0.0001);
+        if mask.all() {
+            break;
+        }
         let derivative = rho(
             option_dir,
             spot,
@@ -464,21 +475,15 @@ pub(crate) fn implied_ir_f32x8(
             years_to_expiry,
         );
 
-        let diff = option_value - price;
-        let mask = diff.abs().cmp_lt(0.0001.into());
-        if mask.all() {
-            break;
-        }
-        let bump_mask = diff.cmp_gt(f32x8::ZERO);
-        let bump_value = (diff / derivative).abs();
-        risk_free_rate = bump_mask.blend(risk_free_rate - bump_value, risk_free_rate + bump_value);
+        let derivative = derivative.max(f32x8::ONE);
+        let bump_value = diff / derivative;
+        risk_free_rate = risk_free_rate - bump_value;
         // Extremes
         risk_free_rate = risk_free_rate
             .cmp_lt(f32x8::ZERO)
             .blend(f32x8::ZERO, risk_free_rate);
-        risk_free_rate = risk_free_rate
-            .cmp_gt(2.0.into())
-            .blend(2.0.into(), risk_free_rate);
+        risk_free_rate = risk_free_rate.cmp_gt(2.0);
+        risk_free_rate = risk_free_rate.blend(2.0.into(), risk_free_rate);
 
         if count > 50 {
             break;
@@ -486,6 +491,8 @@ pub(crate) fn implied_ir_f32x8(
             count = count + 1
         }
     }
+    let price_mask = price.cmp_eq(f32x8::ZERO);
+    risk_free_rate = price_mask.blend(f32x8::ZERO, risk_free_rate);
     risk_free_rate
 }
 
@@ -997,15 +1004,15 @@ mod tests {
 
     #[test]
     fn check_iv_from_price_f32x8() {
-        let spot = 100.0;
-        let strike = 100.0;
+        let spot = 131.0;
+        let strike = 115.0;
         let years_to_expiry = 24.0 / 252.0;
-        let risk_free_rate = 0.02;
-        let volatility = 0.18;
-        let dividend_yield = 0.00;
+        let risk_free_rate = 0.001;
+        let volatility = 0.419;
+        let dividend_yield = 0.00625 * 12.0;
 
         // Basic call/put test
-        let call_s = call(
+        let call_s = put(
             spot,
             strike,
             volatility,
@@ -1014,7 +1021,7 @@ mod tests {
             years_to_expiry,
         );
         let v: [f32; 8] = cast(implied_vol_f32x8(
-            OptionDir::CALL,
+            OptionDir::PUT,
             call_s.into(),
             spot.into(),
             strike.into(),
@@ -1022,6 +1029,7 @@ mod tests {
             dividend_yield.into(),
             years_to_expiry.into(),
         ));
+        println!("Put {} IV {:?}", call_s, v);
         assert!((v[0] - volatility).abs() < 0.001);
     }
 

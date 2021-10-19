@@ -1,26 +1,26 @@
 [package]
-name = "black_scholes_pricer"
-version = "0.2.1"
 authors = ["ronnie chowdhury <ronnie.c995@gmail.com>"]
-edition = "2018"
 description = "Scalar and SIMD vectorised versions of black scholes and binomial option pricing"
-license = "MIT"
-repository = "https://github.com/ronniec95/black_scholes"
 documentation = "https://docs.rs/black_scholes_simd"
+edition = "2018"
+keywords = ["option", "pricing", "simd", "black", "scholes"]
+license = "MIT"
+name = "black_scholes_pricer"
 readme = "README.md"
-keywords = ["option","pricing","simd","black","scholes"]
+repository = "https://github.com/ronniec95/black_scholes"
+version = "0.2.2"
 
 [lib]
 name = "black_scholes_pricer"
 
 [dependencies]
-wide= "0.5"
 bytemuck = "^1"
+wide = "0.7"
 
 [profile.dev]
-opt-level = 0
 debug = 2
+opt-level = 0
 
 [profile.release]
-opt-level = 3
 debug = 0
+opt-level = 3
