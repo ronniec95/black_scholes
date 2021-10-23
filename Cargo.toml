@@ -6,9 +6,8 @@ edition = "2018"
 keywords = ["option", "pricing", "simd", "black", "scholes"]
 license = "MIT"
 name = "black_scholes_pricer"
-repository = "https://github.com/ronniec95/black_scholes"
 readme = "README.md"
-keywords = ["option","pricing","simd","black","scholes"]
+repository = "https://github.com/ronniec95/black_scholes"
 version = "0.2.2"
 
 [lib]
