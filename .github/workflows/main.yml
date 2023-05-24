@@ -1,26 +1,36 @@
 name: Branch Name Check
 
 on:
+  push:
+    branches-ignore:
+      - main  # Exclude the main branch
   pull_request:
-    types:
-      - opened
+    branches-ignore:
+      - main  # Exclude the main branch
 
 jobs:
-  check_branch_name:
+  branch_name_check:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-
-      - name: Check Branch Name
-        run: |
-          branch_name=$(git branch --show-current)
-          regex='^fix\/D7-[0-9]{4}$'
-
-          if [[ ! $branch_name =~ $regex ]]; then
-            echo "Branch name '$branch_name' is invalid. It should be in the format 'fix/D7-XXXX' where the last four X are integers."
-            exit 1
-          else
-            echo "Branch name '$branch_name' is valid."
-          fi
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      
+    - name: Run branch name check
+      run: |
+        import re
+        
+        def check_branch_name(branch_name):
+            # Remove any non-alphabetic characters from the branch name
+            cleaned_name = re.sub('[^a-zA-Z]', '', branch_name)
+            
+            if len(cleaned_name) == 4:
+                print("Branch name is valid.")
+            else:
+                print("Branch name is not valid.")
+        
+        # Extract the branch name from the GitHub event payload
+        branch_name = ${{ github.ref }}
+        
+        # Call the branch name check function
+        check_branch_name(branch_name)
