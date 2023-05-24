@@ -1,9 +1,9 @@
 name: Branch Name Check
 
 on:
-  create:
-    branches:
-      - "*"
+  pull_request:
+    types:
+      - opened
 
 jobs:
   branch_name_check:
@@ -14,9 +14,8 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Extract branch name
-        id: branch_name
         run: |
-          branch_name="${{ github.ref }}"
+          branch_name=$(git symbolic-ref --short HEAD)
           echo "::set-output name=branch_name::$branch_name"
 
       - name: Run branch name check
@@ -28,25 +27,17 @@ jobs:
             echo "Branch name is valid."
           else
             echo "Branch name is not valid."
-            exit 1
+            echo "::set-output name=invalid_branch::true"
           fi
 
-      - name: Get branch creator
-        id: branch_creator
+      - name: Send notification to pull request
+        if: steps.branch_name_check.outputs.invalid_branch == 'true'
         run: |
-          creator=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
-            | jq -r '.user.login')
+          branch_name="${{ steps.branch_name.outputs.branch_name }}"
+          github_token="${{ secrets.GITHUB_TOKEN }}"
+          comment="The branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
 
-          echo "::set-output name=branch_creator::$creator"
-
-      - name: Send notification to branch creator
-        if: failure()
-        run: |
-          branch_creator="${{ steps.branch_creator.outputs.branch_creator }}"
-          comment="Hi @$branch_creator, the branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
-
-          curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+          curl -s -X POST -H "Authorization: Bearer $github_token" \
             -H "Content-Type: application/json" \
             -d "{\"body\":\"$comment\"}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
