@@ -1,4 +1,4 @@
-name: Branch Name Check
+name: Last Branch Name Check
 
 on:
   push:
@@ -11,26 +11,42 @@ on:
 jobs:
   branch_name_check:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-      
+
+    - name: Get branch list
+      id: branches
+      run: |
+        # Fetch the branch list
+        branches=$(curl -s -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/branches \
+          | jq -r '.[].name')
+
+        # Output the branch list as a workflow output
+        echo "::set-output name=branch_list::$branches"
+
+    - name: Extract last branch name
+      id: last_branch
+      run: |
+        # Extract the last branch name from the branch list
+        last_branch=$(echo "${{ steps.branches.outputs.branch_list }}" \
+          | tr ' ' '\n' \
+          | tail -1)
+
+        # Output the last branch name as a workflow output
+        echo "::set-output name=last_branch_name::$last_branch"
+
     - name: Run branch name check
       run: |
-        import re
-        
-        def check_branch_name(branch_name):
-            # Remove any non-alphabetic characters from the branch name
-            cleaned_name = re.sub('[^a-zA-Z]', '', branch_name)
-            
-            if len(cleaned_name) == 4:
-                print("Branch name is valid.")
-            else:
-                print("Branch name is not valid.")
-        
-        # Extract the branch name from the GitHub event payload
-        branch_name = ${{ github.ref }}
-        
-        # Call the branch name check function
-        check_branch_name(branch_name)
+        last_branch_name="${{ steps.last_branch.outputs.last_branch_name }}"
+
+        # Remove any non-numeric characters from the branch name
+        cleaned_name=$(echo "$last_branch_name" | tr -cd '[:digit:]')
+
+        if [ ${#cleaned_name} -eq 4 ]; then
+          echo "Branch name is valid."
+        else
+          echo "Branch name is not valid."
+        fi
