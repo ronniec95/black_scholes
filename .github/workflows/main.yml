@@ -1,26 +1,22 @@
-name: Branch Name Check
+name: Check Branch Name
 
 on:
-  create:
+  push:
     branches:
       - '*'
 
 jobs:
-  branch_name_check:
+  check_branch_name:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      
+
       - name: Check branch name
         run: |
-          branch_name=$(git symbolic-ref --short HEAD)
-          regex="^[0-9]+$"
-          
-          if [[ $branch_name =~ $regex ]]; then
-            echo "Branch name is valid."
-          else
-            echo "Branch name should consist of numbers."
+          branch_name=$(echo "${GITHUB_REF#refs/heads/}")
+          if [[ ! "$branch_name" =~ ^feature/D7-[0-9]{0,4}$ ]]; then
+            echo "Invalid branch name format. Branch names should start with 'feature/D7-' and can have up to 4 numbers at the end."
             exit 1
           fi
