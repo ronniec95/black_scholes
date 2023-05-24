@@ -2,10 +2,7 @@ name: Branch Name Validation
 
 on:
   create:
-    branches-ignore:
-      - '*'
-  push:
-    branches-ignore:
+    branches:
       - '*'
 
 jobs:
@@ -26,14 +23,13 @@ jobs:
           branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
           if [[ ! $branch_name =~ ^[0-9]{4}$ ]]; then
             echo "Invalid branch name: $branch_name"
-            echo "::set-output name=valid::false"
+            exit 1
           else
             echo "Valid branch name: $branch_name"
-            echo "::set-output name=valid::true"
           fi
 
-      - name: Send email notification
-        if: ${{ steps.validate_branch_name.outputs.valid != 'true' }}
+      - name: Send error email notification
+        if: ${{ job.status != 'success' }}
         run: |
-          # Add code to send email notification here
-          echo "Branch name is not valid. Please ensure it consists of four numbers."
+          # Add code to send error email notification here
+          echo "Branch name is not valid. Please ensure it consists of four integers."
