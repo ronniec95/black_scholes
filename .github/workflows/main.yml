@@ -14,48 +14,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check Branch Name
-        id: branch_check
         run: |
           branch_name=$(git branch --show-current)
-          regex='^[0-9]{4}$'
+          regex='^fix\/D7-[0-9]{4}$'
 
           if [[ ! $branch_name =~ $regex ]]; then
-            echo "Branch name '$branch_name' is invalid. It should consist of 4 digits."
-            echo "::set-output name=valid_branch::false"
+            echo "Branch name '$branch_name' is invalid. It should be in the format 'fix/D7-XXXX' where the last four X are integers."
+            exit 1
           else
-            echo "::set-output name=valid_branch::true"
+            echo "Branch name '$branch_name' is valid."
           fi
-
-      - name: Set Status Check
-        if: steps.branch_check.outputs.valid_branch == 'false'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          status="failure"
-          title="Invalid Branch Name"
-          summary="The branch name should consist of 4 digits."
-          details="The branch name '$(git branch --show-current)' is invalid. It should consist of 4 digits."
-
-          payload=$(echo '{}' | jq --arg status "$status" --arg title "$title" --arg summary "$summary" --arg details "$details" '.state=$status | .name=$title | .output.summary=$summary | .output.text=$details')
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -d "$payload" \
-            "https://api.github.com/repos/black_scholes/check-runs"
-
-      - name: Set Status Check
-        if: steps.branch_check.outputs.valid_branch == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          status="success"
-          title="Valid Branch Name"
-          summary="The branch name consists of 4 digits."
-          details="The branch name '$(git branch --show-current)' is valid."
-
-          payload=$(echo '{}' | jq --arg status "$status" --arg title "$title" --arg summary "$summary" --arg details "$details" '.state=$status | .name=$title | .output.summary=$summary | .output.text=$details')
-          curl -X POST \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -d "$payload" \
-            "https://api.github.com/repos/black_scholes/check-runs"
