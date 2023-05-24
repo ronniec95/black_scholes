@@ -1,0 +1,26 @@
+name: Branch Name Check
+
+on:
+  create:
+    branches:
+      - '*'
+
+jobs:
+  branch_name_check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Check branch name
+        run: |
+          branch_name=$(git symbolic-ref --short HEAD)
+          regex="^[0-9]+$"
+          
+          if [[ $branch_name =~ $regex ]]; then
+            echo "Branch name is valid."
+          else
+            echo "Branch name should consist of numbers."
+            exit 1
+          fi
