@@ -30,5 +30,18 @@ jobs:
           echo "Branch name is valid."
         else
           echo "Branch name is not valid."
+          
+          # Get the branch creator's username using the GitHub API
+          creator=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+            | jq -r '.[0].user.login')
+          
+          # Send a comment to the branch creator
+          comment="Hi @$creator, the branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
+          curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"body\":\"$comment\"}" \
+            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+            
           exit 1
         fi
