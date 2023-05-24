@@ -1,14 +1,7 @@
 asdasd SDA #[allow(non_snake_case)]
 use crate::bs::OptionDir;
 use wide::*;
-
-fn erf_f32x8(x: f32x8) -> f32x8 {
-    let t = x.sign_bit();
-    let e = x.abs();
-    let n: f32x8 = f32x8::splat(0.3275911);
-    let a: f32x8 = f32x8::splat(0.254829592);
-    let r: f32x8 = f32x8::splat(-0.284496736);
-    let i: f32x8 = f32x8::splat(1.421413741);
+dasdacdacdasdascdad
     let l: f32x8 = f32x8::splat(-1.453152027);
     let d: f32x8 = f32x8::splat(1.061405429);
     let u = f32x8::ONE / e.mul_add(n, f32x8::ONE);
