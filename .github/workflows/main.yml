@@ -8,40 +8,45 @@ on:
 jobs:
   branch_name_check:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      
-    - name: Extract branch name
-      id: branch_name
-      run: |
-        branch_name=${{ github.ref }}
-        echo "::set-output name=branch_name::$branch_name"
-        
-    - name: Run branch name check
-      run: |
-        branch_name="${{ steps.branch_name.outputs.branch_name }}"
-        
-        # Remove any non-numeric characters from the branch name
-        cleaned_name=$(echo "$branch_name" | tr -cd '[:digit:]')
-        
-        if [ ${#cleaned_name} -eq 4 ]; then
-          echo "Branch name is valid."
-        else
-          echo "Branch name is not valid."
-          
-          # Get the branch creator's username using the GitHub API
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Extract branch name
+        id: branch_name
+        run: |
+          branch_name="${{ github.ref }}"
+          echo "::set-output name=branch_name::$branch_name"
+
+      - name: Run branch name check
+        run: |
+          branch_name="${{ steps.branch_name.outputs.branch_name }}"
+          cleaned_name=$(echo "$branch_name" | tr -cd '[:digit:]')
+
+          if [ ${#cleaned_name} -eq 4 ]; then
+            echo "Branch name is valid."
+          else
+            echo "Branch name is not valid."
+            exit 1
+          fi
+
+      - name: Get branch creator
+        id: branch_creator
+        run: |
           creator=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
-            | jq -r '.[0].user.login')
-          
-          # Send a comment to the branch creator
-          comment="Hi @$creator, the branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
+            https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} \
+            | jq -r '.user.login')
+
+          echo "::set-output name=branch_creator::$creator"
+
+      - name: Send notification to branch creator
+        if: failure()
+        run: |
+          branch_creator="${{ steps.branch_creator.outputs.branch_creator }}"
+          comment="Hi @$branch_creator, the branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
+
           curl -s -X POST -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"body\":\"$comment\"}" \
             "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
-            
-          exit 1
-        fi
