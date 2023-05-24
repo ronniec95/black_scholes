@@ -1,22 +1,24 @@
-name: Check Branch Name
+name: Branch Name Check
 
 on:
-  push:
-    branches:
-      - '*'
+  pull_request:
+    types:
+      - opened
 
 jobs:
   check_branch_name:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Check branch name
+      - name: Check Branch Name
         run: |
-          branch_name=$(echo "${GITHUB_REF#refs/heads/}")
-          if [[ ! "$branch_name" =~ ^[0-9]{4}$ ]]; then
-            echo "Invalid branch name format. Branch names should consist of exactly four numbers."
+          branch_name=$(git branch --show-current)
+          regex='^[0-9]{4}$'
+
+          if [[ ! $branch_name =~ $regex ]]; then
+            echo "Branch name '$branch_name' is invalid. It should consist of 4 digits."
             exit 1
           fi
