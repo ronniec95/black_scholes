@@ -30,14 +30,10 @@ jobs:
             echo "::set-output name=invalid_branch::true"
           fi
 
-      - name: Send notification to pull request
+      - name: Send email notification
         if: steps.branch_name_check.outputs.invalid_branch == 'true'
         run: |
           branch_name="${{ steps.branch_name.outputs.branch_name }}"
-          github_token="${{ secrets.GITHUB_TOKEN }}"
-          comment="The branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
-
-          curl -s -X POST -H "Authorization: Bearer $github_token" \
-            -H "Content-Type: application/json" \
-            -d "{\"body\":\"$comment\"}" \
-            "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments"
+          email_subject="Invalid Branch Name"
+          email_body="The branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
+          echo "$email_body" | mail -s "$email_subject" recipient@example.com
