@@ -1,10 +1,12 @@
 name: Branch Name Validation
 
 on:
-  pull_request:
-    types:
-      - opened
-      - synchronize
+  create:
+    branches-ignore:
+      - '*'
+  push:
+    branches-ignore:
+      - '*'
 
 jobs:
   validate-branch-name:
