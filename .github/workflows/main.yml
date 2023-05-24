@@ -1,39 +1,36 @@
-name: Branch Name Check
+name: Branch Name Validation
 
 on:
-  pull_request:
-    types:
-      - opened
+  push:
+    branches-ignore:
+      - '*'
 
 jobs:
-  branch_name_check:
+  validate-branch-name:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Extract branch name
-        run: |
-          branch_name=$(git symbolic-ref --short HEAD)
-          echo "::set-output name=branch_name::$branch_name"
+        id: extract_branch_name
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: Run branch name check
+      - name: Validate branch name
+        id: validate_branch_name
         run: |
-          branch_name="${{ steps.branch_name.outputs.branch_name }}"
-          cleaned_name=$(echo "$branch_name" | tr -cd '[:digit:]')
-
-          if [ ${#cleaned_name} -eq 4 ]; then
-            echo "Branch name is valid."
+          branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
+          if [[ ! $branch_name =~ ^[0-9]{4}$ ]]; then
+            echo "Invalid branch name: $branch_name"
+            echo "::set-output name=valid::false"
           else
-            echo "Branch name is not valid."
-            echo "::set-output name=invalid_branch::true"
+            echo "Valid branch name: $branch_name"
+            echo "::set-output name=valid::true"
           fi
 
       - name: Send email notification
-        if: steps.branch_name_check.outputs.invalid_branch == 'true'
+        if: ${{ steps.validate_branch_name.outputs.valid != 'true' }}
         run: |
-          branch_name="${{ steps.branch_name.outputs.branch_name }}"
-          email_subject="Invalid Branch Name"
-          email_body="The branch name '$branch_name' is not valid. Please ensure the branch name consists of exactly four integers."
-          echo "$email_body" | mail -s "$email_subject" recipient@example.com
+          # Add code to send email notification here
+          echo "Branch name is not valid. Please ensure it consists of four numbers."
