@@ -1,52 +1,34 @@
-name: Last Branch Name Check
+name: Branch Name Check
 
 on:
-  push:
-    branches-ignore:
-      - main  # Exclude the main branch
-  pull_request:
-    branches-ignore:
-      - main  # Exclude the main branch
+  create:
+    branches:
+      - "*"
 
 jobs:
   branch_name_check:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
-
-    - name: Get branch list
-      id: branches
+      
+    - name: Extract branch name
+      id: branch_name
       run: |
-        # Fetch the branch list
-        branches=$(curl -s -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${{ github.repository }}/branches \
-          | jq -r '.[].name')
-
-        # Output the branch list as a workflow output
-        echo "::set-output name=branch_list::$branches"
-
-    - name: Extract last branch name
-      id: last_branch
-      run: |
-        # Extract the last branch name from the branch list
-        last_branch=$(echo "${{ steps.branches.outputs.branch_list }}" \
-          | tr ' ' '\n' \
-          | tail -1)
-
-        # Output the last branch name as a workflow output
-        echo "::set-output name=last_branch_name::$last_branch"
-
+        branch_name=${{ github.ref }}
+        echo "::set-output name=branch_name::$branch_name"
+        
     - name: Run branch name check
       run: |
-        last_branch_name="${{ steps.last_branch.outputs.last_branch_name }}"
-
+        branch_name="${{ steps.branch_name.outputs.branch_name }}"
+        
         # Remove any non-numeric characters from the branch name
-        cleaned_name=$(echo "$last_branch_name" | tr -cd '[:digit:]')
-
+        cleaned_name=$(echo "$branch_name" | tr -cd '[:digit:]')
+        
         if [ ${#cleaned_name} -eq 4 ]; then
           echo "Branch name is valid."
         else
           echo "Branch name is not valid."
+          exit 1
         fi
