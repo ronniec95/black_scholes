@@ -16,7 +16,7 @@ jobs:
       - name: Check branch name
         run: |
           branch_name=$(echo "${GITHUB_REF#refs/heads/}")
-          if [[ ! "$branch_name" =~^feature/D7-[0-9]{0,4}$ ]]; then
-            echo "Invalid branch name format. Branch names should start with 'feature/D7-' and can have up to 4 numbers at the end."
+          if [[ ! "$branch_name" =~ ^[0-9]{4}$ ]]; then
+            echo "Invalid branch name format. Branch names should consist of exactly four numbers."
             exit 1
           fi
