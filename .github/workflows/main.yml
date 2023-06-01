@@ -2,8 +2,8 @@ name: Branch Name Validation
 
 on:
   push:
-    branches:
-      - '*'
+    branches-ignore:
+      - master
   create:
     branches:
       - '*'
@@ -39,6 +39,6 @@ jobs:
           echo "Branch name is not valid. Please ensure it consists of four integers."
 
       - name: Check success status
-        if: ${{ steps.validate_branch_name.outputs.valid_branch == 'true' }}
+        if: ${{ github.ref == 'refs/heads/' + steps.extract_branch_name.outputs.branch_name && steps.validate_branch_name.outputs.valid_branch == 'true' }}
         run: |
           echo "Branch name check was successful for branch ${{ steps.extract_branch_name.outputs.branch_name }}"
