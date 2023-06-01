@@ -24,7 +24,7 @@ jobs:
         id: validate_branch_name
         run: |
           branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
-          if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release\[0-9]{1,2}\.\[0-9]{1,2})$ ]]; then
+          if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/\[0-9]{1,2}\.\[0-9]{1,2})$ ]]; then
             echo "Invalid branch name: $branch_name"
             exit 1
           else
