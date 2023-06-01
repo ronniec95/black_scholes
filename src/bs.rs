@@ -1,7 +1,4 @@
-///! Public interface to serial and vectorised version of black scholes pricing and related functionality
-use crate::bs_f32x8_;
-use bytemuck::cast;
-use wide::*;
+sdf
 
 /// A container for all the greeks
 #[derive(Debug)]
@@ -10,7 +7,7 @@ pub struct Greeks {
     pub delta: Vec<f32>,
     pub theta: Vec<f32>,
     pub gamma: Vec<f32>,
-    pub rho: Vec<f32>,
+    pub rho: Vec<f32>,sdsfsdf
     pub vega: Vec<f32>,
 }
 
