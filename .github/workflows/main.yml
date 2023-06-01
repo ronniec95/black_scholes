@@ -38,7 +38,4 @@ jobs:
           # Add code to send error email notification here
           echo "Branch name is not valid. Please ensure it consists of four integers."
 
-      - name: Check success status
-        if: ${{ github.ref == 'refs/heads/' + steps.extract_branch_name.outputs.branch_name && steps.validate_branch_name.outputs.valid_branch == 'true' }}
-        run: |
-          echo "Branch name check was successful for branch ${{ steps.extract_branch_name.outputs.branch_name }}"
+
