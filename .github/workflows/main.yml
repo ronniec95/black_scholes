@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - '*'
+  create:
+    branches:
+      - '*'
+
 jobs:
   validate-branch-name:
     runs-on: ubuntu-latest
@@ -25,6 +29,7 @@ jobs:
             exit 1
           else
             echo "Valid branch name: $branch_name"
+            echo "::set-output name=valid_branch::true"
           fi
 
       - name: Send error email notification
@@ -32,3 +37,8 @@ jobs:
         run: |
           # Add code to send error email notification here
           echo "Branch name is not valid. Please ensure it consists of four integers."
+
+      - name: Check success status
+        if: ${{ steps.validate_branch_name.outputs.valid_branch == 'true' }}
+        run: |
+          echo "Branch name check was successful for branch ${{ steps.extract_branch_name.outputs.branch_name }}"
