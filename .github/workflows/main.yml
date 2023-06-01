@@ -4,10 +4,6 @@ on:
   push:
     branches-ignore:
       - '*'
-  create:
-    branches-ignore:
-      - '*'
-
 jobs:
   validate-branch-name:
     runs-on: ubuntu-latest
