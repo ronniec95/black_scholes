@@ -16,20 +16,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Extract branch name
-        id: extract_branch_name
-        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+      - name: Get branch list
+        id: get_branches
+        run: echo "::set-output name=branches::$(git branch -r --format='%(refname:lstrip=2)')"
 
-      - name: Validate branch name
-        id: validate_branch_name
+      - name: Iterate through branches
+        id: iterate_branches
         run: |
-          branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
-          if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}.[0-9]{1,2})$ ]]; then
-            echo "Invalid branch name: $branch_name"
-            exit 1
-          else
-            echo "Valid branch name: $branch_name"
-          fi
+          branches="${{ steps.get_branches.outputs.branches }}"
+          for branch in $branches; do
+            branch_name="${branch#origin/}"
+            if [[ ! $branch_name =~ ^[0-9]{4}$ ]]; then
+              echo "Invalid branch name: $branch_name"
+              exit 1
+            else
+              echo "Valid branch name: $branch_name"
+            fi
+          done
 
       - name: Send error email notification
         if: ${{ job.status != 'success' }}
