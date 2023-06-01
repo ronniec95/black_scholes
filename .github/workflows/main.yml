@@ -2,10 +2,10 @@ name: Branch Name Validation
 
 on:
   push:
-    branches:
+    branches-ignore:
       - '*'
   create:
-    branches:
+    branches-ignore:
       - '*'
 
 jobs:
@@ -16,26 +16,23 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get branch list
-        id: get_branches
-        run: echo "::set-output name=branches::$(git branch -r --format='%(refname:lstrip=2)')"
+      - name: Extract branch name
+        id: extract_branch_name
+        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
 
-      - name: Iterate through branches
-        id: iterate_branches
+      - name: Validate branch name
+        id: validate_branch_name
         run: |
-          branches="${{ steps.get_branches.outputs.branches }}"
-          for branch in $branches; do
-            branch_name="${branch#origin/}"
-            if [[ ! $branch_name =~ ^[0-9]{4}$ ]]; then
-              echo "Invalid branch name: $branch_name"
-              exit 1
-            else
-              echo "Valid branch name: $branch_name"
-            fi
-          done
+          branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
+          if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}.[0-9]{1,2})$ ]]; then
+            echo "Invalid branch name: $branch_name"
+            exit 1
+          else
+            echo "Valid branch name: $branch_name"
+          fi
 
       - name: Send error email notification
         if: ${{ job.status != 'success' }}
         run: |
           # Add code to send error email notification here
-          echo "Branch name is not valid. Please ensure it consists of four integers."
+          echo "Branch name is not valid. Please ensure it matches the specified pattern."
