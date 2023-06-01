@@ -26,7 +26,7 @@ jobs:
           branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
           if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}.[0-9]{1,2})$ ]]; then
             echo "Invalid branch name: $branch_name"
-            exit 1
+            echo "::set-output name=valid_branch::false"
           else
             echo "Valid branch name: $branch_name"
             echo "::set-output name=valid_branch::true"
@@ -38,4 +38,26 @@ jobs:
           # Add code to send error email notification here
           echo "Branch name is not valid. Please ensure it consists of four integers."
 
+      - name: Check success status
+        if: ${{ github.ref == 'refs/heads/' + steps.extract_branch_name.outputs.branch_name }}
+        run: |
+          branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
+          valid_branch="${{ steps.validate_branch_name.outputs.valid_branch }}"
+          echo "Branch name check was successful for branch $branch_name with status: $valid_branch"
+          echo "::set-output name=branch_checks::${{ steps.branch_checks.outputs.branch_checks }}$branch_name:$valid_branch,"
+          echo "::set-output name=valid_branch::$valid_branch"
 
+  summarize-branch-checks:
+    needs: validate-branch-name
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Summarize branch checks
+        id: branch_checks
+        run: |
+          branch_checks="${{ needs.validate-branch-name.outputs.branch_checks }}"
+          branch_checks="${branch_checks::-1}"
+          echo "::set-output name=branch_checks::$branch_checks"
+
+      - name: Print branch checks summary
+        run: echo "Branch checks summary: ${{ steps.branch_checks.outputs.branch_checks }}"
