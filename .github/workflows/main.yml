@@ -15,13 +15,13 @@ jobs:
 
       - name: Extract branch name
         id: extract_branch_name
-        run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+        run: echo "::set-output name=branch_name::${{ github.ref }}"
 
       - name: Validate branch name
         id: validate_branch_name
         run: |
           branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
-          if [[ ! $branch_name =~ ^(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}\.[0-9]{1,2})$ ]]; then
+          if [[ ! $branch_name =~ ^(refs/heads/)?(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}\.[0-9]{1,2})$ ]]; then
             echo "Invalid branch name: $branch_name"
             exit 1
           else
