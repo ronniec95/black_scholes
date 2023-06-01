@@ -15,7 +15,7 @@ jobs:
 
       - name: Extract branch name
         id: extract_branch_name
-        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
 
       - name: Validate branch name
         id: validate_branch_name
