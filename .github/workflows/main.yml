@@ -2,8 +2,11 @@ name: Branch Name Validation
 
 on:
   push:
-    branches:
+    branches-ignore:
       - '*'
+    paths-ignore:
+      - '**'
+  workflow_dispatch:
 
 jobs:
   validate-branch-name:
@@ -21,7 +24,7 @@ jobs:
         id: validate_branch_name
         run: |
           branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
-          if [[ ! $branch_name =~ ^(refs/heads/)?(fix/D7-[0-9]{4}|feature/D7-[0-9]{4}|sprint/[0-9]{1,2}|release/[0-9]{1,2}\.[0-9]{1,2})$ ]]; then
+          if [[ ! $branch_name =~ ^[0-9]{4}$ ]]; then
             echo "Invalid branch name: $branch_name"
             exit 1
           else
@@ -32,4 +35,4 @@ jobs:
         if: ${{ job.status != 'success' }}
         run: |
           # Add code to send error email notification here
-          echo "Branch name is not valid. Please ensure it matches the specified pattern."
+          echo "Branch name is not valid. Please ensure it consists of four integers."
