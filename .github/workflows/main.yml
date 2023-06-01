@@ -1,6 +1,9 @@
 name: Branch Name Validation
 
 on:
+  push:
+    branches:
+      - '*'
   create:
     branches:
       - '*'
