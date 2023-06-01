@@ -33,6 +33,17 @@ jobs:
 
       - name: Send error email notification
         if: ${{ job.status != 'success' }}
+        env:
+          SMTP_SERVER: smtp.example.com
+          SMTP_PORT: 587
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_FROM: sender@example.com
+          EMAIL_TO: recipient@example.com
         run: |
-          # Add code to send error email notification here
-          echo "Branch name is not valid. Please ensure it consists of four integers."
+          echo "Subject: Branch Name Validation Error" | tee /tmp/email.txt
+          echo "To: $EMAIL_TO" | tee -a /tmp/email.txt
+          echo "From: $EMAIL_FROM" | tee -a /tmp/email.txt
+          echo "" | tee -a /tmp/email.txt
+          echo "Branch name is not valid. Please ensure it consists of four integers." | tee -a /tmp/email.txt
+          cat /tmp/email.txt | sendmail -t
