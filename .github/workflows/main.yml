@@ -31,8 +31,4 @@ jobs:
             exit 1
           fi
           
-      - name: Send error email notification
-        if: ${{ job.status != 'success' }}
-        run: |
-          # Add code to send error email notification here
-          echo "Branch name is not valid. Please adhere to coding conventions https://confluencep1.deutsche-boerse.de/display/DD/D7+Git+Workflow?preview=/432375340/432375353/GitWorkflow.pdf."
+ 
