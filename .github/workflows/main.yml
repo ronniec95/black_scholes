@@ -35,8 +35,3 @@ jobs:
             exit 1
           fi
           
-      - name: Send error email notification
-        if: ${{ job.status != 'success' }}
-        run: |
-          # Add code to send error email notification here
-          echo "Branch name is not valid. Please ensure it consists of four integers."
