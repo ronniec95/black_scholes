@@ -1,10 +1,10 @@
-name: Branch Name Check
+name: Validate Branch Name
 
 on:
   push:
     branches-ignore:
       - '*'
-
+    types:
 
 
 jobs:
@@ -23,8 +23,8 @@ jobs:
         run: |
           branch_name="${{ steps.branch_name.outputs.branch }}"
           if [[ "$branch_name" =~ ^sprint/[0-9]+.*$ || \
-                "$branch_name" =~ ^feature/D7-[0-9]+.*$ || \
-                "$branch_name" =~ ^fix/D7-[0-9]+.*$ || \
+                "$branch_name" =~ ^feature/D7-[0-9]{4}.*$ || \
+                "$branch_name" =~ ^fix/D7-[0-9]{4}.*$ || \
                 "$branch_name" =~ ^release/[0-9]+\.[0-9]+.*$ ]]; then
             echo "Branch name is valid"
           else
