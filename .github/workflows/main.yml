@@ -2,11 +2,6 @@ name: Branch Name Validation
 
 on:
   push:
-    branches-ignore:
-      - master
-  create:
-    branches:
-      - '*'
 
 jobs:
   validate-branch-name:
@@ -31,7 +26,7 @@ jobs:
             echo "Branch name is valid"
             
           else
-            echo "Valid branch name: $branch_name"
+            echo "alid branch name: $branch_name"
             exit 1
           fi
           
