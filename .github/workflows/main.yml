@@ -32,9 +32,9 @@ jobs:
             
           else
             echo "Valid branch name: $branch_name"
-            echo "::set-output name=valid_branch::true"
             exit 1
           fi
+          
       - name: Send error email notification
         if: ${{ job.status != 'success' }}
         run: |
