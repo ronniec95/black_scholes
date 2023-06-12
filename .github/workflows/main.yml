@@ -1,27 +1,25 @@
-name: Branch Name Validation
+name: Branch Name Check
 
 on:
   push:
     branches-ignore:
-      - master
-  create:
-    branches:
       - '*'
+    types:
+      - created
 
 jobs:
-  validate-branch-name:
+  branch_name_check:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v2
-
-      - name: Extract branch name
-        id: extract_branch_name
-        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
-
+      
+      - name: Get last created branch name
+        id: branch_name
+        run: echo "::set-output name=branch::$(git rev-parse --abbrev-ref HEAD)"
+      
       - name: Validate branch name
-        id: validate_branch_name
         run: |
           branch_name="${{ steps.branch_name.outputs.branch }}"
           if [[ "$branch_name" =~ ^sprint/[0-9]+$ || \
@@ -33,9 +31,3 @@ jobs:
             echo "Branch name is invalid"
             exit 1
           fi
-
-      - name: Send error email notification
-        if: ${{ job.status != 'success' }}
-        run: |
-          # Add code to send error email notification here
-          echo "Branch name is not valid. Please ensure it consists of four integers."
