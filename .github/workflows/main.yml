@@ -21,10 +21,10 @@ jobs:
       - name: Validate branch name
         run: |
           branch_name="${{ steps.branch_name.outputs.branch }}"
-          if [[ "$branch_name" == sprint/* || \
-                "$branch_name" == feature/D7-* || \
-                "$branch_name" == fix/D7-* || \
-                "$branch_name" == release/* ]]; then
+          if [[ "$branch_name" == sprint/[1-9]+.* || \
+                "$branch_name" == feature/D7-[1-9]\{4}.* || \
+                "$branch_name" == fix/D7-[1-9]\{4}.* || \
+                "$branch_name" == release/[1-9]+.[1-9]+.* ]]; then
             echo "Branch name is valid"
           else
             echo "Branch name is invalid"
