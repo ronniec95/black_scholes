@@ -2,6 +2,9 @@ name: Branch Name Validation
 
 on:
   push:
+    branches-ignore:
+      - main
+      - master
 
 jobs:
   validate-branch-name:
@@ -13,20 +16,21 @@ jobs:
 
       - name: Extract branch name
         id: extract_branch_name
-        run: echo "::set-output name=branch_name::$(echo ${GITHUB_REF#refs/heads/})"
+        run: |
+          branches=$(git ls-remote --heads origin | awk -F'/' '{print $NF}' | grep -v "master")
+          last_branch=$(echo "$branches" | head -n1)
+          echo "::set-output name=branch_name::$last_branch"
 
       - name: Validate branch name
         id: validate_branch_name
         run: |
-          branch_name="${{ steps.branch_name.outputs.branch }}"
-          if [[ "$branch" =~ ^sprint/[0-9]+.*$ || \
-                  "$branch" =~ ^feature/D7-[0-9]+.*$ || \
-                  "$branch" =~ ^fix/D7-[0-9]+.*$ || \
-                  "$branch" =~ ^release/[0-9]+\.[0-9]+.*$ ]]; then
+          branch_name="${{ steps.extract_branch_name.outputs.branch_name }}"
+          if [[ "$branch_name" =~ ^sprint/[0-9]+.*$ || \
+                "$branch_name" =~ ^feature/D7-[0-9]+.*$ || \
+                "$branch_name" =~ ^fix/D7-[0-9]+.*$ || \
+                "$branch_name" =~ ^release/[0-9]+\.[0-9]+.*$ ]]; then
             echo "Branch name is valid"
-            
           else
-            echo "alid branch name: $branch_name"
+            echo "Invalid branch name: $branch_name"
             exit 1
           fi
-          
