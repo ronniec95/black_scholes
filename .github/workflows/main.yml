@@ -1,9 +1,6 @@
 name: Validate Branch Name
 
 on:
-  push:
-    branches-ignore:
-      - master
   create:
     branches:
       - '*'
