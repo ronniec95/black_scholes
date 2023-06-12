@@ -1,0 +1,31 @@
+name: Validate Branch Name
+
+on:
+  create:
+    branches:
+      - '*'
+
+jobs:
+  branch_name_check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+      
+      - name: Get last created branch name
+        id: branch_name
+        run: echo "::set-output name=branch::$(git rev-parse --abbrev-ref HEAD)"
+      
+      - name: Validate branch name
+        run: |
+          branch_name="${{ steps.branch_name.outputs.branch }}"
+          if [[ "$branch_name" =~ ^sprint/[0-9]+.*$ || \
+                "$branch_name" =~ ^feature/D7-[0-9]{4}.*$ || \
+                "$branch_name" =~ ^fix/D7-[0-9]{4}.*$ || \
+                "$branch_name" =~ ^release/[0-9]+\.[0-9]+.*$ ]]; then
+            echo "Branch name is valid"
+          else
+            echo "Branch name is invalid"
+            exit 1
+          fi
