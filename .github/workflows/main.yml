@@ -3,9 +3,10 @@ name: Validate Branch Name
 on:
   push:
     branches-ignore:
+      - master
+  create:
+    branches:
       - '*'
-    types:
-
 
 jobs:
   branch_name_check:
