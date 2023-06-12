@@ -5,7 +5,7 @@ on:
     branches-ignore:
       - '*'
     types:
-      - created
+
 
 jobs:
   branch_name_check:
